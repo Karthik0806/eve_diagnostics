@@ -37,10 +37,10 @@ springdoc:
 
 app:
   jwt:
-    secret: ${APP_JWT_SECRET:AXoe70scCpUxyMbk5thSNkPyFjkAN3wZH23oaVU8HjA}
+    secret: ${APP_JWT_SECRET:dev-only-jwt-secret-change-me-0123456789abcdef}
     expiration-minutes: ${APP_JWT_EXPIRATION_MINUTES:60}
   webhook:
-    secret: ${APP_WEBHOOK_SECRET:9a581690100c6f6664fd335650f3ca20ac3323ce86abd3c696f985ae36a0fee1}
+    secret: ${APP_WEBHOOK_SECRET:dev-webhook-secret}
     signature-required: ${APP_WEBHOOK_SIGNATURE_REQUIRED:true}
   payment-sim:
     success-rate: ${APP_PAYMENT_SUCCESS_RATE:0.8}
