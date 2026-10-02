@@ -377,13 +377,3 @@ Docker + docker-compose · Swagger/OpenAPI · integration tests · structured lo
 - Admins are bootstrapped from configuration; there is no endpoint to promote users.
 - The rate limiter keys on the TCP remote address; behind a proxy it should use a trusted `X-Forwarded-For`.
 
-## 🗺️ Roadmap
-
-- [ ] **Real payment lifecycle**: `PENDING` payments, provider-driven transitions, refunds, reconciliation of bookings stuck in `PENDING`
-- [ ] **Background work**: transactional outbox + worker for webhook retries / confirmation emails; scheduled expiry of unpaid bookings
-- [ ] **Redis**: cache the read-heavy catalogue; distributed rate limiter
-- [ ] **Availability**: time slots and capacity per centre, with a DB exclusion constraint against double-booking
-- [ ] **Auth**: refresh tokens, token revocation, email verification, password reset, admin user-management API
-- [ ] **Webhook hardening**: timestamp in the signed payload to prevent replay of old signed requests, secret rotation, per-provider event schemas
-- [ ] **Testing**: run integration tests against real PostgreSQL via Testcontainers (partial indexes, true row-lock behaviour); add concurrency tests for racing webhooks/payments; unit tests for the transition rules
-- [ ] **Ops**: metrics (Micrometer/Prometheus), tracing, Dependabot/CI pipeline, secrets from a vault
