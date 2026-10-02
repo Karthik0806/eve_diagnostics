@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EVE Healthcare - Book a diagnostic test</title>
+  <style>
+    :root{--bg:#f4faf9;--card:#fff;--ink:#0b2b33;--mut:#5b7480;--line:#dbe8e7;--pri:#0f766e;--pri2:#0b5d57;--tint:#e3f4f1;--pri-ink:#fff;--ok:#15803d;--bad:#b91c1c;--warn:#b45309;--info:#1d4ed8;--code:#0b1a20;--codeink:#e2e8f0}
+    @media (prefers-color-scheme:dark){:root{--bg:#0b1a1f;--card:#12262c;--ink:#e6f2f1;--mut:#93aab0;--line:#21404a;--pri:#2dd4bf;--pri2:#5eead4;--tint:#133a3a;--pri-ink:#04201d;--ok:#4ade80;--bad:#f87171;--warn:#fbbf24;--info:#60a5fa}}
+    *{box-sizing:border-box}[hidden]{display:none!important}
+    body{margin:0;font:15px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+    h1,h2,h3{margin:0;line-height:1.2}small,.mut{color:var(--mut)}
+    button,input,select{font:inherit}
+    input,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+    input:focus,select:focus,button:focus-visible{outline:2px solid var(--pri);outline-offset:1px}
+    label{display:block;font-size:13px;color:var(--mut);margin:12px 0 4px}
+    button{padding:9px 16px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);cursor:pointer}
+    button.p{background:var(--pri);color:var(--pri-ink);border-color:var(--pri);font-weight:600}button.p:hover{background:var(--pri2)}
+    button.big{padding:12px 20px;width:100%}button:disabled{opacity:.5;cursor:not-allowed}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.grow{flex:1 1 180px}
+    /* top bar */
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 24px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px;color:var(--pri)}
+    .logo{width:32px;height:32px;border-radius:9px;background:var(--pri);color:var(--pri-ink);display:grid;place-items:center;font-weight:800}
+    .nav{display:flex;gap:4px}.nav button{border:0;background:none;color:var(--mut);font-weight:600}.nav button.on{background:var(--tint);color:var(--pri)}
+    /* auth */
+    .auth{min-height:calc(100vh - 57px);display:grid;grid-template-columns:1.1fr 1fr}
+    .hero{padding:64px 7vw;background:linear-gradient(160deg,var(--pri2),var(--pri));color:#fff;display:flex;flex-direction:column;justify-content:center;gap:20px}
+    .hero h1{font-size:clamp(30px,4.2vw,50px)}.hero p{font-size:17px;max-width:46ch;opacity:.92;margin:0}
+    .hero ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:10px}.hero li:before{content:"\2713";margin-right:10px;font-weight:700}
+    .formWrap{display:grid;place-items:center;padding:32px 20px}
+    .box{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px}
+    .tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--tint);border-radius:10px;padding:4px;margin:14px 0 6px}
+    .tabs button{border:0;background:none;font-weight:600;color:var(--mut)}.tabs button.on{background:var(--card);color:var(--pri)}
+    /* app */
+    .page{max-width:1000px;margin:0 auto;padding:24px 20px 60px}
+    .steps{display:flex;gap:8px;margin:0 0 22px;flex-wrap:wrap}
+    .step{display:flex;align-items:center;gap:8px;color:var(--mut);font-weight:600;font-size:14px}
+    .step i{font-style:normal;width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:12px}
+    .step.on{color:var(--pri)}.step.on i{background:var(--pri);color:var(--pri-ink);border-color:var(--pri)}.step.done i{border-color:var(--pri);color:var(--pri)}
+    .step+.step:before{content:"";width:28px;height:2px;background:var(--line);margin-right:4px}
+    .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));margin-top:16px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+    .off{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+    .off:first-of-type{margin-top:10px}
+    .price{font-weight:700;color:var(--pri)}
+    .sum{display:grid;gap:10px;background:var(--tint);border-radius:10px;padding:14px;margin:14px 0}
+    .sum div{display:flex;justify-content:space-between;gap:12px}
+    table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px 8px;border-top:1px solid var(--line);vertical-align:top}th{font-size:12px;color:var(--mut)}
+    .b{display:inline-block;padding:1px 9px;border-radius:99px;font-size:12px;font-weight:600;border:1px solid currentColor}
+    .PENDING{color:var(--warn)}.CONFIRMED,.SUCCESS,.PROCESSED{color:var(--ok)}.FAILED,.CANCELLED{color:var(--bad)}.DUPLICATE,.NO_CHANGE,.IGNORED{color:var(--info)}
+    details.dev{margin-top:26px}details.dev>summary{cursor:pointer;color:var(--mut);font-weight:600}
+    #log{max-height:260px;overflow:auto;background:var(--code);color:var(--codeink);border-radius:8px;padding:8px;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;margin-top:8px}
+    #log details{border-bottom:1px solid #2a3746;padding:4px 0}#log pre{margin:4px 0 0;white-space:pre-wrap;word-break:break-word}
+    .s2{color:#4ade80}.s4{color:#fbbf24}.s5{color:#f87171}
+    #toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;display:none;max-width:90vw;z-index:9}
+    @media(max-width:800px){.auth{grid-template-columns:1fr}.hero{padding:36px 22px}}
+  </style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo">E</span>EVE Healthcare</div>
+  <nav class="nav" id="nav" hidden>
+    <button id="nCentres" class="on">Book a test</button><button id="nBookings">My bookings</button>
+  </nav>
+  <div class="row" id="userBox" hidden><small id="who"></small><button id="logout">Log out</button></div>
+</header>
+
+<!-- STEP 0: login / signup -->
+<section class="auth" id="vAuth">
+  <div class="hero">
+    <h1>Trusted diagnostics, booked in minutes</h1>
+    <p>Find a nearby centre, choose your test, pick a time and pay securely, all in one place.</p>
+    <ul><li>Certified labs across the city</li><li>Clear prices before you book</li><li>Instant confirmation after payment</li></ul>
+  </div>
+  <div class="formWrap"><div class="box">
+    <h2 id="authTitle">Welcome back</h2><small id="authSub">Log in to book your test.</small>
+    <div class="tabs"><button id="tLogin" class="on">Log in</button><button id="tSignup">Sign up</button></div>
+    <div id="nameWrap" hidden><label for="fullName">Full name</label><input id="fullName" autocomplete="name"></div>
+    <label for="email">Email</label><input id="email" type="email" autocomplete="email">
+    <label for="password">Password <small id="pwHint" hidden>(8+ characters, a letter and a digit)</small></label><input id="password" type="password" autocomplete="current-password">
+    <div style="margin-top:18px"><button class="p big" id="authGo">Log in</button></div>
+  </div></div>
+</section>
+
+<main class="page" id="vApp" hidden>
+  <div class="steps" id="steps"></div>
+
+  <!-- STEP 1: centres & tests -->
+  <section id="vCentres">
+    <h2>Choose a centre and test</h2><small>Search by city or area to see tests and prices.</small>
+    <div class="row" style="margin-top:14px"><input id="loc" class="grow" placeholder="Location, e.g. Hyderabad"><button class="p" id="search">Search</button></div>
+    <div id="centres" class="grid"><p class="mut">Loading centres...</p></div>
+  </section>
+
+  <!-- STEP 2: confirm booking -->
+  <section id="vReview" hidden>
+    <button id="back" style="margin-bottom:12px">&larr; Back to centres</button>
+    <div class="card" style="max-width:520px">
+      <h2>Review your booking</h2>
+      <div class="sum" id="sel"></div>
+      <label for="when">Appointment time</label><input id="when" type="datetime-local">
+      <div style="margin-top:18px"><button class="p big" id="book">Confirm booking</button></div>
+      <small>Your booking is held as pending until payment is complete.</small>
+    </div>
+  </section>
+
+  <!-- STEP 3: bookings & payment -->
+  <section id="vBookings" hidden>
+    <div class="row" style="justify-content:space-between"><div><h2>My bookings</h2><small>Pay for pending bookings to confirm your slot.</small></div><button id="refresh">Refresh</button></div>
+    <div class="card" style="margin-top:14px;overflow-x:auto">
+      <table><thead><tr><th>#</th><th>Test and centre</th><th>When</th><th>Amount</th><th>Status</th><th></th></tr></thead><tbody id="bk"></tbody></table>
+    </div>
+
+    <details class="dev">
+      <summary>Developer tools (payment simulator, webhook, API log)</summary>
+      <div class="grid">
+        <div class="card"><h3>Payment webhook simulator</h3>
+          <small>Signs the body with HMAC-SHA256 and posts to /payments/webhook/. Try the same event ID twice.</small>
+          <label for="simOut">Simulated payment outcome</label><select id="simOut"><option value="">Random</option><option>SUCCESS</option><option>FAILED</option></select>
+          <label for="evt">Event ID</label><div class="row"><input id="evt" class="grow"><button id="newEvt">New ID</button></div>
+          <label for="ref">Payment reference</label><input id="ref" placeholder="pay_... (filled after paying)">
+          <label for="wst">Status reported</label><select id="wst"><option>SUCCESS</option><option>FAILED</option></select>
+          <label for="sec">Webhook secret</label><input id="sec" value="dev-webhook-secret">
+          <div class="row" style="margin-top:12px"><button class="p" id="wh">Send signed webhook</button><button id="whBad">Send bad signature</button></div>
+          <div id="whOut" style="margin-top:10px"></div>
+        </div>
+        <div class="card"><h3>API log</h3><label for="base">API base URL</label><input id="base">
+          <div id="log"><span class="mut">Requests appear here.</span></div>
+          <div class="row" style="margin-top:8px"><button id="clr">Clear</button></div>
+        </div>
+      </div>
+    </details>
+  </section>
+</main>
+<div id="toast" role="status"></div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const money = n => Number(n).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const state = { token: null, user: null, sel: null, pay: {}, mode: 'login', view: 'centres' };
+  try { state.pay = JSON.parse(sessionStorage.getItem('eve.pay') || '{}'); } catch (e) {}
+  const savePay = () => { try { sessionStorage.setItem('eve.pay', JSON.stringify(state.pay)); } catch (e) {} };
+
+  $('base').value = location.protocol.startsWith('http') ? location.origin : 'http://localhost:8080';
+  const newEvent = () => { $('evt').value = 'evt_' + Math.random().toString(36).slice(2, 10); };
+  newEvent();
+  (() => { const d = new Date(Date.now() + 86400000); d.setHours(10, 0, 0, 0); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); $('when').value = d.toISOString().slice(0, 16); })();
+
+  function toast(msg, bad) {
+    const t = $('toast'); t.textContent = msg; t.style.background = bad ? 'var(--bad)' : ''; t.style.color = bad ? '#fff' : '';
+    t.style.display = 'block'; clearTimeout(toast.h); toast.h = setTimeout(() => t.style.display = 'none', 3500);
+  }
+  function logEntry(method, path, reqBody, status, resBody, ms) {
+    const cls = status >= 500 || status === 0 ? 's5' : status >= 400 ? 's4' : 's2';
+    const d = document.createElement('details');
+    d.innerHTML = '<summary><b>' + esc(method) + '</b> ' + esc(path) + ' <span class="' + cls + '">' + (status || 'network error') + '</span> ' + ms + 'ms</summary>' +
+            (reqBody ? '<pre>&rarr; ' + esc(reqBody) + '</pre>' : '') + '<pre>&larr; ' + esc(typeof resBody === 'string' ? resBody : JSON.stringify(resBody, null, 2)) + '</pre>';
+    const log = $('log'); if (log.firstElementChild && log.firstElementChild.tagName === 'SPAN') log.innerHTML = '';
+    log.prepend(d); while (log.children.length > 40) log.lastChild.remove();
+  }
+  async function api(method, path, body, opts = {}) {
+    const headers = {};
+    const raw = body === undefined ? undefined : (typeof body === 'string' ? body : JSON.stringify(body));
+    if (raw !== undefined) headers['Content-Type'] = 'application/json';
+    if (state.token && !opts.noAuth) headers['Authorization'] = 'Bearer ' + state.token;
+    Object.assign(headers, opts.headers || {});
+    const t0 = performance.now();
+    try {
+      const res = await fetch($('base').value.replace(/\/$/, '') + path, { method, headers, body: raw });
+      const text = await res.text(); let data = text;
+      try { data = text ? JSON.parse(text) : null; } catch (e) {}
+      logEntry(method, path, raw, res.status, data, Math.round(performance.now() - t0));
+      return { ok: res.ok, status: res.status, data };
+    } catch (e) {
+      logEntry(method, path, raw, 0, String(e), Math.round(performance.now() - t0));
+      toast('Cannot reach the server. Check the API address under Developer tools.', true);
+      return { ok: false, status: 0, data: null };
+    }
+  }
+  const errMsg = r => !r.data ? 'Request failed' : (r.data.details && r.data.details.length ? r.data.message + ': ' + r.data.details.map(d => d.field + ' ' + d.message).join(', ') : r.data.message || 'Request failed');
+
+  /* ---------- navigation ---------- */
+  const STEPS = [['centres', 'Choose test'], ['review', 'Confirm booking'], ['bookings', 'Pay']];
+  function show(view) {
+    state.view = view;
+    $('vAuth').hidden = view === 'auth'? false : true;
+    $('vApp').hidden = view === 'auth';
+    ['centres', 'review', 'bookings'].forEach(v => $('v' + v[0].toUpperCase() + v.slice(1)).hidden = v !== view);
+    const loggedIn = view !== 'auth';
+    $('nav').hidden = !loggedIn; $('userBox').hidden = !loggedIn;
+    $('nCentres').classList.toggle('on', view === 'centres' || view === 'review'); $('nBookings').classList.toggle('on', view === 'bookings');
+    const idx = STEPS.findIndex(s => s[0] === view);
+    $('steps').innerHTML = STEPS.map((s, i) => '<div class="step ' + (i === idx ? 'on' : i < idx ? 'done' : '') + '"><i>' + (i < idx ? '&#10003;' : i + 1) + '</i>' + s[1] + '</div>').join('');
+    window.scrollTo(0, 0);
+    if (view === 'bookings') loadBookings();
+  }
+  $('nCentres').onclick = () => show('centres'); $('nBookings').onclick = () => show('bookings'); $('back').onclick = () => show('centres');
+
+  /* ---------- auth ---------- */
+  function setMode(m) {
+    state.mode = m; const su = m === 'signup';
+    $('tLogin').classList.toggle('on', !su); $('tSignup').classList.toggle('on', su);
+    $('nameWrap').hidden = !su; $('pwHint').hidden = !su;
+    $('authTitle').textContent = su ? 'Create your account' : 'Welcome back';
+    $('authSub').textContent = su ? 'Sign up to start booking tests.' : 'Log in to book your test.';
+    $('authGo').textContent = su ? 'Create account' : 'Log in';
+    $('password').autocomplete = su ? 'new-password' : 'current-password';
+  }
+  $('tLogin').onclick = () => setMode('login'); $('tSignup').onclick = () => setMode('signup');
+  async function login(email, password) {
+    const r = await api('POST', '/auth/login', { email, password }, { noAuth: true });
+    if (!r.ok) return toast(errMsg(r), true);
+    state.token = r.data.accessToken;
+    const me = await api('GET', '/auth/me');
+    state.user = me.data; $('who').textContent = state.user ? state.user.fullName : '';
+    toast('Welcome' + (state.user ? ', ' + state.user.fullName : '')); show('centres'); loadCentres();
+  }
+  async function submitAuth() {
+    const email = $('email').value.trim(), password = $('password').value;
+    if (!email || !password) return toast('Enter your email and password', true);
+    if (state.mode === 'signup') {
+      const r = await api('POST', '/auth/signup', { email, password, fullName: $('fullName').value.trim() }, { noAuth: true });
+      if (!r.ok) return toast(errMsg(r), true);
+    }
+    login(email, password);
+  }
+  $('authGo').onclick = submitAuth;
+  ['email', 'password', 'fullName'].forEach(i => $(i).onkeydown = e => { if (e.key === 'Enter') submitAuth(); });
+  $('logout').onclick = () => { state.token = null; state.user = null; state.sel = null; $('password').value = ''; show('auth'); toast('Logged out'); };
+
+  /* ---------- centres ---------- */
+  async function loadCentres() {
+    const q = $('loc').value.trim();
+    const r = await api('GET', '/centres?size=50' + (q ? '&location=' + encodeURIComponent(q) : ''), undefined, { noAuth: true });
+    const box = $('centres');
+    if (!r.ok) { box.innerHTML = '<p class="mut">Could not load centres. Try again.</p>'; return; }
+    if (!r.data.content.length) { box.innerHTML = '<p class="mut">No centres found. Try a different location.</p>'; return; }
+    box.innerHTML = r.data.content.map(c => '<div class="card"><h3>' + esc(c.name) + '</h3><small>' + esc(c.location) + '</small>' +
+            (c.tests.length ? c.tests.map(t => '<div class="off"><span>' + esc(t.testName) + '<br><span class="price">' + money(t.price) + '</span></span><button class="p" data-c="' + c.id + '" data-t="' + t.testId + '" data-cn="' + esc(c.name) + '" data-tn="' + esc(t.testName) + '" data-p="' + t.price + '">Select</button></div>').join('') : '<div class="mut" style="margin-top:10px">No tests offered yet</div>') + '</div>').join('');
+    box.querySelectorAll('button[data-c]').forEach(b => b.onclick = () => {
+      state.sel = { centreId: +b.dataset.c, testId: +b.dataset.t, centre: b.dataset.cn, test: b.dataset.tn, price: b.dataset.p };
+      $('sel').innerHTML = '<div><span class="mut">Test</span><b>' + esc(state.sel.test) + '</b></div><div><span class="mut">Centre</span><b>' + esc(state.sel.centre) + '</b></div><div><span class="mut">Price</span><b class="price">' + money(state.sel.price) + '</b></div>';
+      show('review');
+    });
+  }
+  $('search').onclick = loadCentres; $('loc').onkeydown = e => { if (e.key === 'Enter') loadCentres(); };
+
+  /* ---------- booking ---------- */
+  $('book').onclick = async () => {
+    const when = $('when').value; if (!when) return toast('Choose an appointment time', true);
+    const r = await api('POST', '/bookings', { centreId: state.sel.centreId, testId: state.sel.testId, appointmentTime: new Date(when).toISOString() });
+    if (!r.ok) return toast(errMsg(r), true);
+    toast('Booking #' + r.data.id + ' created. Complete payment to confirm.'); show('bookings');
+  };
+  async function loadBookings() {
+    const tb = $('bk');
+    const r = await api('GET', '/bookings?size=50');
+    if (!r.ok) return;
+    if (!r.data.content.length) { tb.innerHTML = '<tr><td colspan="6" class="mut">No bookings yet. Book your first test from the Book a test tab.</td></tr>'; return; }
+    tb.innerHTML = r.data.content.map(b => {
+      const p = state.pay[b.id], payable = b.status === 'PENDING' || b.status === 'FAILED', cancellable = b.status !== 'CANCELLED';
+      return '<tr><td>' + b.id + '</td><td><b>' + esc(b.testName) + '</b><br><small>' + esc(b.centreName) + '</small></td><td>' + esc(new Date(b.appointmentTime).toLocaleString()) +
+              '</td><td>' + money(b.amount) + '</td><td><span class="b ' + b.status + '">' + b.status + '</span>' +
+              (p ? '<br><small>Ref <code>' + esc(p.ref) + '</code></small>' : '') + '</td><td><div class="row">' +
+              (payable ? '<button class="p" data-pay="' + b.id + '">' + (b.status === 'FAILED' ? 'Retry payment' : 'Pay now') + '</button>' : '') +
+              (cancellable ? '<button data-cancel="' + b.id + '">Cancel</button>' : '') + '</div></td></tr>';
+    }).join('');
+    tb.querySelectorAll('[data-pay]').forEach(b => b.onclick = () => pay(+b.dataset.pay));
+    tb.querySelectorAll('[data-cancel]').forEach(b => b.onclick = () => cancel(+b.dataset.cancel));
+  }
+  async function pay(id) {
+    const body = { bookingId: id }, o = $('simOut').value; if (o) body.simulatedOutcome = o;
+    const r = await api('POST', '/payments/', body);
+    if (!r.ok) return toast(errMsg(r), true);
+    state.pay[id] = { ref: r.data.providerReference, status: r.data.status }; savePay(); $('ref').value = r.data.providerReference;
+    toast(r.data.status === 'FAILED' ? 'Payment failed. You can retry.' : 'Payment successful. Booking ' + r.data.bookingStatus.toLowerCase() + '.', r.data.status === 'FAILED');
+    loadBookings();
+  }
+  async function cancel(id) {
+    if (!confirm('Cancel booking #' + id + '?')) return;
+    const r = await api('POST', '/bookings/' + id + '/cancel');
+    if (!r.ok) return toast(errMsg(r), true);
+    toast('Booking #' + id + ' cancelled'); loadBookings();
+  }
+  $('refresh').onclick = loadBookings;
+
+  /* ---------- webhook simulator ---------- */
+  async function hmacHex(secret, text) {
+    if (!window.crypto || !crypto.subtle) throw new Error('Web Crypto unavailable. Open the page via http://localhost or https.');
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    const sig = await crypto.subtle.sign('HMAC', key, enc.encode(text));
+    return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  async function sendWebhook(badSig) {
+    const body = JSON.stringify({ eventId: $('evt').value.trim(), paymentReference: $('ref').value.trim(), status: $('wst').value });
+    let sig;
+    try { sig = badSig ? 'deadbeef' : await hmacHex($('sec').value, body); } catch (e) { return toast(e.message, true); }
+    const r = await api('POST', '/payments/webhook/', body, { noAuth: true, headers: { 'X-Webhook-Signature': sig } });
+    const out = $('whOut');
+    if (r.ok) out.innerHTML = '<span class="b ' + esc(r.data.result) + '">' + esc(r.data.result) + '</span> ' + esc(r.data.message);
+    else out.innerHTML = '<span class="b FAILED">HTTP ' + r.status + '</span> ' + esc(errMsg(r));
+    if (r.ok) loadBookings();
+  }
+  $('wh').onclick = () => sendWebhook(false); $('whBad').onclick = () => sendWebhook(true); $('newEvt').onclick = newEvent;
+  $('clr').onclick = () => { $('log').innerHTML = '<span class="mut">Requests appear here.</span>'; };
+
+  show('auth'); setMode('login');
+</script>
+</body>
+</html>

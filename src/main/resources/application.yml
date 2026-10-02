@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: eve-diagnostics
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/eve_diagnostics}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:12345678}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: 8080
+  shutdown: graceful
+
+logging:
+  pattern:
+    level: "%5p [req=%X{requestId:-}]"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET:dev-only-jwt-secret-change-me-0123456789abcdef}
+    expiration-minutes: ${APP_JWT_EXPIRATION_MINUTES:60}
+  webhook:
+    secret: ${APP_WEBHOOK_SECRET:dev-webhook-secret}
+    signature-required: ${APP_WEBHOOK_SIGNATURE_REQUIRED:true}
+  payment-sim:
+    success-rate: ${APP_PAYMENT_SUCCESS_RATE:0.8}
+  admin:
+    email: ${APP_ADMIN_EMAIL:admin@eve.local}
+    password: ${APP_ADMIN_PASSWORD:Admin@12345}
+  seed:
+    sample-data: ${APP_SEED_SAMPLE_DATA:true}
+  rate-limit:
+    enabled: ${APP_RATE_LIMIT_ENABLED:true}
+    auth-per-minute: ${APP_RATE_LIMIT_AUTH_PER_MINUTE:20}

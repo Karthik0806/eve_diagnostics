@@ -1,0 +1,5 @@
+# Activated by docker-compose: structured (ECS JSON) logs on stdout.
+logging:
+  structured:
+    format:
+      console: ecs
