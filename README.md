@@ -36,7 +36,7 @@ docker compose up --build
 | What | URL |
 |---|---|
 | API | <http://localhost:8080> |
-| Swagger UI | <http://localhost:8080/swagger-ui.html> |
+| Documentation | <http://localhost:8080/docs.html> |
 | Demo UI | <http://localhost:8080/> |
 | Health | <http://localhost:8080/actuator/health> |
 
