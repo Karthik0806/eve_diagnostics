@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EVE Diagnostics - Documentation</title>
+<style>
+:root{--bg:#f7f9fb;--card:#fff;--ink:#1c2430;--mut:#64748b;--line:#e2e8f0;--pri:#0f766e;--code:#0f172a;--cink:#e2e8f0;--get:#1d4ed8;--post:#15803d;--put:#b45309;--del:#b91c1c}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1720;--card:#18222e;--ink:#e6edf3;--mut:#94a3b8;--line:#2a3746;--pri:#2dd4bf;--code:#0a1018;--get:#60a5fa;--post:#4ade80;--put:#fbbf24;--del:#f87171}}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:16px}
+body{margin:0;font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);display:flex}
+nav{position:sticky;top:0;align-self:flex-start;height:100vh;width:230px;flex:0 0 230px;padding:20px 14px;border-right:1px solid var(--line);background:var(--card);overflow:auto}
+nav b{display:block;margin-bottom:12px}nav a{display:block;padding:5px 10px;color:var(--mut);text-decoration:none;border-radius:6px;font-size:14px}
+nav a:hover,nav a.on{background:color-mix(in srgb,var(--pri) 14%,transparent);color:var(--ink)}
+main{flex:1;max-width:900px;padding:28px 32px 80px;min-width:0}
+section{margin-bottom:44px}h1{font-size:28px;margin:0 0 6px}h2{font-size:21px;margin:0 0 12px;padding-bottom:6px;border-bottom:1px solid var(--line)}h3{font-size:16px;margin:20px 0 6px}
+p,li{color:var(--ink)}.mut{color:var(--mut)}a{color:var(--pri)}
+code{background:color-mix(in srgb,var(--mut) 18%,transparent);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{position:relative;background:var(--code);color:var(--cink);padding:12px 14px;border-radius:8px;overflow:auto;font-size:13px;line-height:1.5;margin:8px 0}pre code{background:none;padding:0;color:inherit}
+.cp{position:absolute;top:6px;right:6px;font-size:11px;padding:2px 8px;border:1px solid #475569;border-radius:5px;background:transparent;color:var(--cink);cursor:pointer}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:14px}th,td{text-align:left;padding:8px 10px;border-top:1px solid var(--line);vertical-align:top}th{background:color-mix(in srgb,var(--mut) 10%,transparent);font-size:12px;color:var(--mut);border-top:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}.card b{display:block;margin-bottom:2px}
+.m{display:inline-block;min-width:56px;text-align:center;font:700 11px ui-monospace,monospace;padding:2px 6px;border-radius:5px;color:#fff}.GET{background:var(--get)}.POST{background:var(--post)}.PUT{background:var(--put)}.DELETE{background:var(--del)}
+.ep{background:var(--card);border:1px solid var(--line);border-radius:8px;margin:8px 0}.ep summary{cursor:pointer;padding:9px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.ep .p{font:13px ui-monospace,monospace}.ep .d{color:var(--mut);font-size:13px;flex:1 1 220px}.ep .body{padding:0 12px 10px}
+.tag{font-size:11px;padding:1px 7px;border-radius:99px;border:1px solid var(--line);color:var(--mut)}.tag.a{color:var(--put);border-color:var(--put)}
+.steps{counter-reset:s;list-style:none;padding:0}.steps li{counter-increment:s;position:relative;padding:6px 0 6px 38px}.steps li:before{content:counter(s);position:absolute;left:0;top:5px;width:26px;height:26px;border-radius:50%;background:var(--pri);color:var(--card);font-weight:700;text-align:center;line-height:26px;font-size:13px}
+.flow{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:10px 0}.flow span{padding:4px 10px;border-radius:99px;border:1px solid var(--line);background:var(--card);font-size:13px;font-weight:600}.flow i{color:var(--mut);font-style:normal;font-size:12px}
+#q{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit;margin-bottom:6px}
+@media (max-width:760px){nav{display:none}main{padding:20px 16px}}
+</style>
+</head>
+<body>
+<nav id="nav"><b>EVE Diagnostics</b>
+<a href="#overview">Overview</a><a href="#quickstart">Quick start</a><a href="#auth">Authentication</a><a href="#api">API reference</a><a href="#flow">Booking &amp; payment flow</a><a href="#webhook">Webhook &amp; idempotency</a><a href="#data">Data model</a><a href="#errors">Errors</a><a href="#config">Configuration</a><a href="#tests">Testing</a>
+<hr style="border:0;border-top:1px solid var(--line);margin:12px 0"><a href="/">Demo UI</a><a href="/swagger-ui.html">Swagger UI</a></nav>
+
+<main>
+<section id="overview">
+<h1>EVE Diagnostics API</h1>
+<p class="mut">Book diagnostic tests at centres, pay through a simulated provider, and receive provider updates through an idempotent webhook.</p>
+<div class="grid">
+<div class="card"><b>Stack</b>Java 21, Spring Boot 3.4, Spring Security, JPA, Flyway</div>
+<div class="card"><b>Database</b>PostgreSQL 16 (H2 in tests)</div>
+<div class="card"><b>Auth</b>JWT bearer tokens, roles <code>USER</code> and <code>ADMIN</code></div>
+<div class="card"><b>Base URL</b><code>http://localhost:8080</code></div>
+</div>
+</section>
+
+<section id="quickstart">
+<h2>Quick start</h2>
+<pre><code>docker compose up --build        # app + PostgreSQL
+# or: docker compose up -d db &amp;&amp; mvn spring-boot:run</code></pre>
+<p>Then open the <a href="/">demo UI</a> or <a href="/swagger-ui.html">Swagger UI</a>. First start seeds sample centres and an admin account:</p>
+<table><tr><th>Account</th><th>Credentials</th></tr><tr><td>Admin</td><td><code>admin@eve.local</code> / <code>Admin@12345</code></td></tr><tr><td>User</td><td>create one with <code>POST /auth/signup</code></td></tr></table>
+<h3>First requests</h3>
+<pre><code>curl -s -X POST localhost:8080/auth/login -H 'Content-Type: application/json' \
+  -d '{"email":"admin@eve.local","password":"Admin@12345"}'
+curl -s "localhost:8080/centres?location=hyderabad"</code></pre>
+</section>
+
+<section id="auth">
+<h2>Authentication</h2>
+<p>Log in to get a token, then send it on every protected request:</p>
+<pre><code>Authorization: Bearer &lt;accessToken&gt;</code></pre>
+<ul>
+<li>Tokens are HS256 JWTs carrying user id, email and role. Default lifetime is 60 minutes.</li>
+<li>Public: signup, login, reading centres and tests, the webhook (signature-protected), health and docs.</li>
+<li>Catalogue writes need <code>ADMIN</code>. A normal user gets <code>403</code>; no token gets <code>401</code>.</li>
+<li>Users only see their own bookings and payments. Someone else's id returns <code>404</code>, so ids cannot be probed.</li>
+<li>Login and signup are rate limited per IP (default 20 per minute, then <code>429</code>).</li>
+</ul>
+</section>
+
+<section id="api">
+<h2>API reference</h2>
+<input id="q" placeholder="Filter endpoints (e.g. booking, admin, webhook)" aria-label="Filter endpoints">
+<p class="mut" style="margin:0 0 8px">Click an endpoint for details and examples. List endpoints accept <code>page</code> (from 0) and <code>size</code> (max 100) and return <code>{content, page, size, totalElements, totalPages}</code>.</p>
+<div id="eps"></div>
+</section>
+
+<section id="flow">
+<h2>Booking and payment flow</h2>
+<ol class="steps">
+<li><b>Browse</b> centres (public). Each centre lists its tests with a price.</li>
+<li><b>Book</b> with <code>POST /bookings</code>. The booking is <code>PENDING</code> and its amount is copied from the centre's price at that moment.</li>
+<li><b>Pay</b> with <code>POST /payments/</code>. The mock provider answers <code>SUCCESS</code> or <code>FAILED</code> and the booking becomes <code>CONFIRMED</code> or <code>FAILED</code>.</li>
+<li><b>Retry</b> a failed booking by paying again. A confirmed or cancelled booking cannot be paid.</li>
+<li><b>Webhook</b> updates arrive from the provider later (see below).</li>
+</ol>
+<div class="flow"><span>PENDING</span><i>pay OK</i><span>CONFIRMED</span></div>
+<div class="flow"><span>PENDING</span><i>pay fails</i><span>FAILED</span><i>retry</i><span>CONFIRMED / FAILED</span></div>
+<div class="flow"><span>PENDING / FAILED / CONFIRMED</span><i>cancel</i><span>CANCELLED (final)</span></div>
+<p class="mut">Payment outcome is random by default (<code>APP_PAYMENT_SUCCESS_RATE</code>). Send <code>simulatedOutcome</code> to force it. Add an <code>Idempotency-Key</code> header to make client retries safe: the same key returns the original payment with <code>200</code>.</p>
+</section>
+
+<section id="webhook">
+<h2>Webhook and idempotency</h2>
+<p><code>POST /payments/webhook/</code> is called by the payment provider. It is authenticated by a signature, not a JWT.</p>
+<pre><code>BODY='{"eventId":"evt_001","paymentReference":"pay_ab12...","status":"SUCCESS"}'
+SIG=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$WEBHOOK_SECRET" -hex | sed 's/^.* //')
+curl -X POST localhost:8080/payments/webhook/ -H 'Content-Type: application/json' \
+  -H "X-Webhook-Signature: $SIG" -d "$BODY"</code></pre>
+<table><tr><th>result</th><th>Meaning</th></tr>
+<tr><td><code>PROCESSED</code></td><td>State changed: payment <code>FAILED</code> to <code>SUCCESS</code>, booking <code>CONFIRMED</code>.</td></tr>
+<tr><td><code>DUPLICATE</code></td><td>This <code>eventId</code> was already received. Nothing was touched.</td></tr>
+<tr><td><code>NO_CHANGE</code></td><td>New event, but the payment is already in that state.</td></tr>
+<tr><td><code>IGNORED</code></td><td>New event that must not apply: it would downgrade a success, the booking is cancelled, or the booking is already paid by another payment.</td></tr></table>
+<h3>Why replays are safe</h3>
+<ul>
+<li>The event row is inserted first inside one transaction. <code>event_id</code> is <code>UNIQUE</code> in the database.</li>
+<li>Two simultaneous deliveries race on that unique index. One wins, the other is answered as <code>DUPLICATE</code>.</li>
+<li>The booking row is locked while its state changes, and a partial unique index allows only one <code>SUCCESS</code> payment per booking.</li>
+<li>If processing fails (for example an unknown payment), everything rolls back including the event row, so the provider's retry still works.</li>
+</ul>
+</section>
+
+<section id="data">
+<h2>Data model</h2>
+<table><tr><th>Table</th><th>Purpose and key rules</th></tr>
+<tr><td><code>users</code></td><td>Unique email, BCrypt hash, role.</td></tr>
+<tr><td><code>diagnostic_tests</code></td><td>Test catalogue. Names are unique ignoring case.</td></tr>
+<tr><td><code>diagnostic_centres</code></td><td>Name and location. Unique per name and location.</td></tr>
+<tr><td><code>centre_tests</code></td><td>Which centre offers which test, at what price. Unique per centre and test.</td></tr>
+<tr><td><code>bookings</code></td><td>User, centre, test, appointment time, price snapshot, status, version column.</td></tr>
+<tr><td><code>payments</code></td><td>Many per booking. Unique provider reference and idempotency key, one success per booking.</td></tr>
+<tr><td><code>webhook_events</code></td><td>Every accepted event. Unique <code>event_id</code> is the idempotency guard.</td></tr></table>
+<p class="mut">Money is <code>NUMERIC(12,2)</code>. Times are UTC. The schema lives in <code>db/migration/V1__init_schema.sql</code>.</p>
+</section>
+
+<section id="errors">
+<h2>Errors</h2>
+<p>Every error has the same shape:</p>
+<pre><code>{ "timestamp": "2026-10-02T10:00:00Z", "status": 400, "error": "Bad Request",
+  "message": "Validation failed", "path": "/bookings",
+  "details": [ { "field": "appointmentTime", "message": "must be in the future" } ] }</code></pre>
+<table><tr><th>Status</th><th>When</th></tr>
+<tr><td>400</td><td>Invalid fields, malformed JSON, bad enum or id format, past appointment time, bad webhook payload.</td></tr>
+<tr><td>401</td><td>Missing, invalid or expired token; wrong login; bad webhook signature.</td></tr>
+<tr><td>403</td><td>Logged in but not an admin on a catalogue write.</td></tr>
+<tr><td>404</td><td>Unknown id, someone else's booking or payment, test not offered by that centre, unknown payment reference.</td></tr>
+<tr><td>409</td><td>Duplicate email, test or centre; duplicate active booking; paying a confirmed or cancelled booking; already cancelled; reused idempotency key.</td></tr>
+<tr><td>429</td><td>Login or signup rate limit.</td></tr>
+<tr><td>500</td><td>Unexpected error. Details are logged, not returned.</td></tr></table>
+</section>
+
+<section id="config">
+<h2>Configuration</h2>
+<p>Set these as environment variables. Defaults are for development only.</p>
+<table><tr><th>Variable</th><th>Default</th><th>Purpose</th></tr>
+<tr><td><code>DB_URL</code>, <code>DB_USERNAME</code>, <code>DB_PASSWORD</code></td><td>local Postgres</td><td>Database connection</td></tr>
+<tr><td><code>APP_JWT_SECRET</code></td><td>dev value</td><td>Signing key, at least 32 bytes</td></tr>
+<tr><td><code>APP_JWT_EXPIRATION_MINUTES</code></td><td>60</td><td>Token lifetime</td></tr>
+<tr><td><code>APP_WEBHOOK_SECRET</code></td><td>dev-webhook-secret</td><td>Shared secret for signatures</td></tr>
+<tr><td><code>APP_WEBHOOK_SIGNATURE_REQUIRED</code></td><td>true</td><td>Turn signature checks off for experiments</td></tr>
+<tr><td><code>APP_PAYMENT_SUCCESS_RATE</code></td><td>0.8</td><td>Chance a mock payment succeeds</td></tr>
+<tr><td><code>APP_ADMIN_EMAIL</code>, <code>APP_ADMIN_PASSWORD</code></td><td>admin@eve.local</td><td>Bootstrap admin</td></tr>
+<tr><td><code>APP_SEED_SAMPLE_DATA</code></td><td>true</td><td>Seed sample centres and tests</td></tr>
+<tr><td><code>APP_CORS_ALLOWED_ORIGINS</code></td><td>*</td><td>Browser origins allowed to call the API</td></tr>
+<tr><td><code>APP_RATE_LIMIT_ENABLED</code></td><td>true</td><td>Login and signup limiter</td></tr></table>
+</section>
+
+<section id="tests">
+<h2>Testing</h2>
+<pre><code>mvn test</code></pre>
+<p>Integration tests run the real app with MockMvc against in-memory H2. They cover signup and login, admin-only catalogue changes, the booking and payment flow, ownership checks, and webhook replays, signatures and out-of-order events.</p>
+</section>
+</main>
+
+<script>
+const EPS=[
+['POST','/auth/signup','public','Register a user (role USER). Returns 201.','{"email":"jane@example.com","password":"Passw0rd!","fullName":"Jane Doe"}','{"id":2,"email":"jane@example.com","fullName":"Jane Doe","role":"USER"}'],
+['POST','/auth/login','public','Exchange credentials for a JWT. Email is case-insensitive.','{"email":"jane@example.com","password":"Passw0rd!"}','{"accessToken":"eyJ...","tokenType":"Bearer","expiresInSeconds":3600}'],
+['GET','/auth/me','user','The logged-in user.','','{"id":2,"email":"jane@example.com","fullName":"Jane Doe","role":"USER"}'],
+['GET','/tests','public','List tests. Query: q (name contains), page, size.','','{"content":[{"id":1,"name":"HbA1c"}],"page":0,"size":20,"totalElements":1,"totalPages":1}'],
+['GET','/tests/{id}','public','One test. 404 if unknown.','',''],
+['POST','/tests','admin','Create a test. 409 if the name exists.','{"name":"Vitamin B12","description":"Serum B12"}','201 {"id":6,"name":"Vitamin B12"}'],
+['PUT','/tests/{id}','admin','Update a test.','{"name":"Vitamin B12","description":"Updated"}',''],
+['GET','/centres','public','List centres with their tests and prices. Query: location (contains), testId (only centres offering it), page, size.','','{"content":[{"id":1,"name":"EVE Diagnostics - Banjara Hills","location":"Hyderabad","tests":[{"testId":1,"testName":"HbA1c","price":450.00}]}]}'],
+['GET','/centres/{id}','public','One centre with its offerings.','',''],
+['POST','/centres','admin','Create a centre. 409 if name and location already exist.','{"name":"EVE Madhapur","location":"Hyderabad"}','201 {"id":4,"name":"EVE Madhapur","location":"Hyderabad","tests":[]}'],
+['PUT','/centres/{id}','admin','Update name or location.','{"name":"EVE Madhapur","location":"Hyderabad"}',''],
+['PUT','/centres/{centreId}/tests/{testId}','admin','Offer a test at a centre, or change its price. Price must be above 0 with at most 2 decimals.','{"price":1200.00}','{"testId":1,"testName":"HbA1c","price":1200.00}'],
+['DELETE','/centres/{centreId}/tests/{testId}','admin','Stop offering a test. Existing bookings keep their price. Returns 204.','',''],
+['POST','/bookings','user','Create a PENDING booking. The amount is the centre price now. 404 if the centre does not offer the test, 409 for a duplicate active booking, 400 for a past time.','{"centreId":1,"testId":1,"appointmentTime":"2027-01-15T10:30:00Z"}','201 {"id":1,"centreName":"...","testName":"HbA1c","amount":450.00,"status":"PENDING"}'],
+['GET','/bookings','user','Your bookings, newest first. Query: status (PENDING, CONFIRMED, FAILED, CANCELLED), page, size.','',''],
+['GET','/bookings/{id}','user','One of your bookings. 404 if it is not yours.','',''],
+['POST','/bookings/{id}/cancel','user','Cancel a booking. 409 if already cancelled or the appointment time has passed.','','{"id":1,"status":"CANCELLED"}'],
+['POST','/payments/','user','Simulated payment. Optional header Idempotency-Key. Optional simulatedOutcome SUCCESS or FAILED, otherwise random. 201 with the payment (a decline is still 201 with status FAILED); 200 on idempotent replay; 409 if the booking is confirmed or cancelled.','{"bookingId":1,"simulatedOutcome":"FAILED"}','{"id":1,"bookingId":1,"amount":450.00,"status":"FAILED","providerReference":"pay_ab12...","bookingStatus":"FAILED"}'],
+['GET','/payments/{id}','user','One of your payments.','',''],
+['POST','/payments/webhook/','signature','Provider status event. Header X-Webhook-Signature is the hex HMAC-SHA256 of the raw body. Idempotent on eventId.','{"eventId":"evt_001","paymentReference":"pay_ab12...","status":"SUCCESS"}','{"eventId":"evt_001","result":"PROCESSED","message":"Payment marked SUCCESS and booking CONFIRMED"}']
+];
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const pre=(label,t)=>'<div class="mut" style="font-size:12px;margin-top:8px">'+label+'</div><pre><code>'+esc(t)+'</code></pre>';
+function render(f){
+  f=(f||'').toLowerCase();
+  document.getElementById('eps').innerHTML=EPS.filter(e=>!f||e.join(' ').toLowerCase().includes(f)).map(e=>
+    '<details class="ep"><summary><span class="m '+e[0]+'">'+e[0]+'</span><span class="p">'+e[1]+'</span><span class="tag'+(e[2]==='admin'?' a':'')+'">'+e[2]+'</span><span class="d">'+esc(e[3].split('. ')[0])+'</span></summary><div class="body"><p>'+esc(e[3])+'</p>'+(e[4]?pre('Request body',e[4]):'')+(e[5]?pre('Response',e[5]):'')+'</div></details>').join('')||'<p class="mut">No matching endpoints.</p>';
+}
+render();document.getElementById('q').oninput=e=>render(e.target.value);
+document.querySelectorAll('pre').forEach(p=>{const b=document.createElement('button');b.className='cp';b.textContent='Copy';b.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(p.innerText.replace(/^Copy\n?/,'')).then(()=>{b.textContent='Copied';setTimeout(()=>b.textContent='Copy',1200)})};p.prepend(b)});
+const links=[...document.querySelectorAll('#nav a[href^="#"]')],secs=links.map(a=>document.querySelector(a.hash));
+addEventListener('scroll',()=>{let i=0;secs.forEach((s,k)=>{if(s.getBoundingClientRect().top<120)i=k});links.forEach((a,k)=>a.classList.toggle('on',k===i))},{passive:true});
+</script>
+</body>
+</html>
