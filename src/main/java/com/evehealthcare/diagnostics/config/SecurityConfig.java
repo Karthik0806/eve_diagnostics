@@ -54,7 +54,7 @@ public class SecurityConfig {
                 .requestMatchers("/auth/signup", "/auth/login",
                         "/actuator/health", "/actuator/health/**",
                         "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**",
-                        "/error").permitAll()
+                        "/error","/docs.html").permitAll()
                 .requestMatchers(HttpMethod.GET, "/", "/index.html", "/favicon.ico").permitAll()
                 .requestMatchers(HttpMethod.GET, "/centres/**", "/tests/**").permitAll()
                 .requestMatchers("/centres/**", "/tests/**").hasRole("ADMIN")
