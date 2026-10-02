@@ -22,6 +22,7 @@ server:
 
 logging:
   pattern:
+    console: "%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
     level: "%5p [req=%X{requestId:-}]"
 
 management:
