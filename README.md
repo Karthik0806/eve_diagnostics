@@ -42,7 +42,7 @@ docker compose up --build
 
 > [!NOTE]
 > In Docker mode, logs are structured JSON (ECS format).
-> initializing and download maven dependencies may take 4 to 8 minutes.
+> Initializing and download maven dependencies may take 4 to 8 minutes.
 
 ### Option B: Local (JDK 21 + Maven 3.9+)
 
