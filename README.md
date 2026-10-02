@@ -308,28 +308,6 @@ stateDiagram-v2
 
 #### Webhook (`WebhookService` → `WebhookProcessor`)
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant P as Provider
-    participant W as WebhookService
-    participant DB as PostgreSQL
-
-    P->>W: POST /payments/webhook/ (signed)
-    W->>W: Verify HMAC (constant-time) + validate payload
-    W->>DB: BEGIN
-    W->>DB: event_id already exists?
-    alt already received
-        W-->>P: 200 DUPLICATE
-    else new event
-        W->>DB: INSERT webhook_events (event_id UNIQUE)
-        W->>DB: SELECT booking FOR UPDATE
-        W->>DB: Apply transition + record outcome
-        W->>DB: COMMIT
-        W-->>P: 200 PROCESSED / NO_CHANGE / IGNORED
-    end
-```
-
 1. Authenticate (HMAC, constant-time compare) and validate the payload.
 2. In **one transaction**: if `event_id` already exists, return `DUPLICATE`. Otherwise **insert the event row first**, then lock the booking (`SELECT ... FOR UPDATE`), apply the state transition and record the outcome.
 3. If two deliveries of the same event race, both try to insert the same `event_id`. One wins; the other blocks on the unique index and fails with a constraint violation, which `WebhookService` converts into a normal `DUPLICATE` response. No duplicate payments, bookings or events can result.
